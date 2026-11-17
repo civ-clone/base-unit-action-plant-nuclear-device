@@ -13,15 +13,19 @@ const mission_1 = require("@civ-clone/base-unit-agent/lib/mission");
  *
  * `perform()`, in order:
  * 1. the Spy must survive a caught check (base-unit-agent's `AgentSurvives` with `CAUGHT_CHECK`; Civ2 makes three,
- *    and one more for a city with a Palace, all in its one answer), or it is destroyed and nothing goes off;
+ *    and one more for a city with a Palace, all in its one answer), after `MissionMode`: one that is caught goes to
+ *    `AgentLost` and is destroyed by the city's owner, and nothing goes off;
  * 2. the device detonates over the city's square: the rule set's `Detonated` rules run
  *    (base-unit-action-nuclear-attack's, which a missile's detonation runs too), with this action in place of a
  *    `NuclearAttack`;
  * 3. the `DevicePlanted` rules, for what follows (Civ2: whether the other civilizations find out);
- * 4. `Moved`, then a Spy the blast didn't destroy is used up unless it survives an `ORDINARY` check (with no
- *    `AgentSurvives` rules, it is used up).
+ * 4. `Moved`, then a Spy the blast didn't destroy is used up (`AgentLost`, then destroyed) unless it survives
+ *    `AgentSurvives` with the resolved mode (with no rules, it is used up).
  *
- * It isn't a `NuclearAttack`, so nothing that treats a missile strike as one (a war it forces, say) treats this as one.
+ * It isn't a `NuclearAttack`, so nothing that checks for one (a war it forces, say) treats this as one. But every
+ * `Detonated` rule runs for it, and a rule that reads no action, such as the vendetta rule a rule set registers from
+ * base-diplomacy, applies to a planted device as to a missile: a Civ2 rule that should tell them apart must check
+ * `action instanceof NuclearAttack`.
  */
 class PlantNuclearDevice extends Action_1.default {
     constructor(from, to, unit, city, ruleRegistry = RuleRegistry_1.instance) {
@@ -39,9 +43,9 @@ class PlantNuclearDevice extends Action_1.default {
     }
     perform() {
         const unit = this.unit(), mission = this, ruleRegistry = this.ruleRegistry();
-        if (!(0, mission_1.agentSurvives)(unit, mission, escape_1.CAUGHT_CHECK, ruleRegistry)) {
-            ruleRegistry.process(Moved_1.default, unit, mission);
-            unit.destroy();
+        const mode = (0, mission_1.missionMode)(unit, mission, escape_1.ORDINARY, ruleRegistry);
+        if (!(0, mission_1.agentSurvives)(unit, mission, escape_1.CAUGHT_CHECK, ruleRegistry, undefined, mode)) {
+            (0, mission_1.loseAgent)(unit, this._city, mission, true, ruleRegistry, this._city.player());
             return;
         }
         // `Detonated` is typed for a missile's `NuclearAttack`; its rules read the unit and the square, and may tell the
@@ -50,8 +54,8 @@ class PlantNuclearDevice extends Action_1.default {
         ruleRegistry.process(DevicePlanted_1.default, unit, this._city, this);
         ruleRegistry.process(Moved_1.default, unit, mission);
         if (!unit.destroyed() &&
-            !(0, mission_1.agentSurvives)(unit, mission, escape_1.ORDINARY, ruleRegistry)) {
-            unit.destroy();
+            !(0, mission_1.agentSurvives)(unit, mission, mode, ruleRegistry)) {
+            (0, mission_1.loseAgent)(unit, this._city, mission, false, ruleRegistry);
         }
     }
 }
