@@ -1,6 +1,6 @@
 {
   "name": "@civ-clone/base-unit-action-plant-nuclear-device",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The PlantNuclearDevice unit action: a Spy sets off a nuclear device in a city, with criteria for offering it.",
   "repository": "git@github.com:civ-clone/base-unit-action-plant-nuclear-device.git",
   "keywords": [
