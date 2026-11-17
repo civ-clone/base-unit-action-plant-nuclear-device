@@ -19,7 +19,7 @@ const mission_1 = require("@civ-clone/base-unit-agent/lib/mission");
  *    (base-unit-action-nuclear-attack's, which a missile's detonation runs too), with this action in place of a
  *    `NuclearAttack`;
  * 3. the `DevicePlanted` rules, for what follows (Civ2: whether the other civilizations find out);
- * 4. `Moved`, then a Spy the blast didn't destroy is used up (`AgentLost`, then destroyed) unless it survives
+ * 4. for a Spy the blast didn't destroy, `Moved`, then it is used up (`AgentLost`, then destroyed) unless it survives
  *    `AgentSurvives` with the resolved mode (with no rules, it is used up).
  *
  * It isn't a `NuclearAttack`, so nothing that checks for one (a war it forces, say) treats this as one. But every
@@ -52,7 +52,10 @@ class PlantNuclearDevice extends Action_1.default {
         //  two apart by the action.
         ruleRegistry.process(Detonated_1.default, unit, this._city.tile(), this);
         ruleRegistry.process(DevicePlanted_1.default, unit, this._city, this);
-        ruleRegistry.process(Moved_1.default, unit, mission);
+        // A Spy the blast destroyed has nowhere to have moved.
+        if (!unit.destroyed()) {
+            ruleRegistry.process(Moved_1.default, unit, mission);
+        }
         if (!unit.destroyed() &&
             !(0, mission_1.agentSurvives)(unit, mission, mode, ruleRegistry)) {
             (0, mission_1.loseAgent)(unit, this._city, mission, false, ruleRegistry);

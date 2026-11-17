@@ -10,7 +10,7 @@ The `PlantNuclearDevice` unit action: a Spy sets off a nuclear device in a city,
      (base-unit-action-nuclear-attack's, which a missile's detonation runs too), with this action in place of a
      `NuclearAttack`;
   3. the `DevicePlanted` rules;
-  4. `Moved`, then a Spy the blast didn't destroy is used up (`AgentLost`, then destroyed) unless it survives
+  4. for a Spy the blast didn't destroy, `Moved`, then it is used up (`AgentLost`, then destroyed) unless it survives
      `AgentSurvives` with the resolved mode; a rule that keeps it must spend its moves.
 
   It isn't a `NuclearAttack`, so nothing that checks for one treats a planted device as one. But every `Detonated`

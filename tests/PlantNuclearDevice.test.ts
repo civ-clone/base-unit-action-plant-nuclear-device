@@ -191,7 +191,7 @@ describe('PlantNuclearDevice', (): void => {
     });
   });
 
-  it('asks nothing more of a Spy the blast destroyed', (): void => {
+  it('runs no `Moved` and asks nothing more of a Spy the blast destroyed', (): void => {
     const set = setUp(),
       asked: EscapeMode[] = [];
 
@@ -226,7 +226,6 @@ describe('PlantNuclearDevice', (): void => {
     expect(set.log).to.deep.equal([
       'detonated true true true',
       'planted true true true',
-      'moved true true',
     ]);
   });
 });

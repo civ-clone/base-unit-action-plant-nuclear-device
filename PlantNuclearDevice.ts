@@ -28,7 +28,7 @@ import {
  *    (base-unit-action-nuclear-attack's, which a missile's detonation runs too), with this action in place of a
  *    `NuclearAttack`;
  * 3. the `DevicePlanted` rules, for what follows (Civ2: whether the other civilizations find out);
- * 4. `Moved`, then a Spy the blast didn't destroy is used up (`AgentLost`, then destroyed) unless it survives
+ * 4. for a Spy the blast didn't destroy, `Moved`, then it is used up (`AgentLost`, then destroyed) unless it survives
  *    `AgentSurvives` with the resolved mode (with no rules, it is used up).
  *
  * It isn't a `NuclearAttack`, so nothing that checks for one (a war it forces, say) treats this as one. But every
@@ -101,7 +101,10 @@ export class PlantNuclearDevice extends Action {
 
     ruleRegistry.process(DevicePlanted, unit, this._city, this);
 
-    ruleRegistry.process(Moved, unit, mission);
+    // A Spy the blast destroyed has nowhere to have moved.
+    if (!unit.destroyed()) {
+      ruleRegistry.process(Moved, unit, mission);
+    }
 
     if (
       !unit.destroyed() &&
